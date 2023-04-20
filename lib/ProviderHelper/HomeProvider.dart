@@ -20,21 +20,6 @@ class HomeProvider with ChangeNotifier{
     //notifyListeners();
   }
 
-  Future<List<Product>> fetchProducts()async{
-    var url = Uri.parse("https://demo.azinova.me/machine-test/api/get_items");
-    final http.Response response = await http.get(url,
-    headers: {
-      'Content-Type' : 'application/json',
-    });
-    String responseBody = response.body;
-    print(responseBody);
-    var result = json.decode(responseBody);
-    var productDetails = result["data"];
-    products = (json.decode(responseBody)['items']as List).map((e) => Product.fromJson(e)).toList();
-    notifyListeners();
-    return products;
-  }
-
   Future<List<Product>> fetchHome({bool reload = false}) async {
     if (reload) {
       resetPage();
