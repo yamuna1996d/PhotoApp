@@ -1,35 +1,36 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../Models/ProductModel.dart';
 import '../ProviderHelper/HomeProvider.dart';
 import 'DetailsPage.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   bool isLoading = true;
   static const _pageSize = 10;
   bool _isLast = false;
+  final homeProvider = ChangeNotifierProvider((ref) => HomeProvider());
   //The PagingController class is used to manage pagination and provide the items to be displayed in the PagedGridView
   final PagingController<int, Product> _pagingController =
       PagingController(firstPageKey: 1);
 
   reload() {
-    Provider.of<HomeProvider>(context, listen: false).resetPage();
+    ref.read(homeProvider).resetPage();
     _pagingController.refresh();
     setState(() {});
   }
 
   @override
   void initState() {
-    Provider.of<HomeProvider>(context, listen: false).resetPage();
+    ref.read(homeProvider).resetPage();
     _pagingController.addPageRequestListener((pageKey) {
       _fetchPage(pageKey);
     });
@@ -42,7 +43,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _fetchPage(int pageKey) async {
     try {
       final newItems =
-          await Provider.of<HomeProvider>(context, listen: false).fetchHome();
+          await ref.read(homeProvider).fetchHome();
       setState(() {
         _isLast = newItems.length < _pageSize;
       });
@@ -74,7 +75,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   // The resetPage method of the HomeProvider is called to reset the current page to 1,
                   // and the refresh method of the PagingController is called to fetch the new data.
                     onRefresh: () {
-                      Provider.of<HomeProvider>(context, listen: false)
+                      ref.read(homeProvider)
                           .resetPage();
                       return Future.sync(() {
                         _pagingController.refresh();
